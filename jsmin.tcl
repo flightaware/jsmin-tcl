@@ -3,7 +3,7 @@ namespace eval jsmin {
 	variable prev ""
 	variable cur ""
 	variable next ""
-	variable noSpaceChars {"\{" "\}" "(" ")" ";" "=" ":" ">" "<" "+" "*" "-" "%" "!"}
+	variable noSpaceChars {"\{" "\}" "(" ")" ";" "," "=" ":" ">" "<" "+" "*" "-" "%" "!" "&" "|" "?"}
 	variable afterNewlineChars {"\\" "\$" "_" "\{" "[" "(" "+" "-"}
 	variable beforeNewlineChars {"\\" "\$" "_" "\}" "]" ")" "+" "-"}
 
@@ -11,6 +11,9 @@ namespace eval jsmin {
 	# Get the next character from stdin. If the character is a
 	# carrage return, '\r', then it replaces it with a line feed,
 	# '\n'.
+	#
+	# Namespace variables prev, cur, and next are used to keep
+	# track of the surrounding characters.
 	#
 	proc get_stdin {} {
 		variable prev
@@ -37,7 +40,6 @@ namespace eval jsmin {
 	# current space character can be discarded.
 	#
 	proc can_discard_space {} {
-		variable prev
 		variable cur
 		variable next
 		variable noSpaceChars
@@ -53,6 +55,7 @@ namespace eval jsmin {
 
 	#
 	# Remove unnecessary spaces and new lines.
+	# Removes comments and ignores quotes.
 	#
 	proc minify {} {
 		variable prev
@@ -71,6 +74,10 @@ namespace eval jsmin {
 		set inSingleQuote 0
 		set inDoubleQuote 0
 		
+		# A common occurrence inside this while loop is to manually
+		# set cur and/or next. This has the effect of skipping a
+		# character as the next call of get_stdin will shift cur
+		# and next back to prev and cur.
 		while {[get_stdin]} {
 			if {$cur == "/" && $next == "/" && !$inBlockComment} {
 				set inLineComment 1
@@ -111,8 +118,8 @@ namespace eval jsmin {
 				}
 
 			} elseif {$cur == "\t"} {
-				puts "TAB"
-
+				# TODO This should behave similar to spaces.
+				continue
 			} else {
 				puts -nonewline $cur
 			}
