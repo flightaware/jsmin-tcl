@@ -100,6 +100,9 @@ namespace eval jsmin {
 				set isIgnoring "lineComment"
 			} elseif {$isIgnoring == "lineComment"} {
 				if {$next == "\n"} {
+					if {$pendingNewline} {
+						set cur $pendingNewlinePrev
+					}
 					set isIgnoring ""
 				}
 
@@ -148,6 +151,10 @@ namespace eval jsmin {
 						set pendingNewline 1
 						set pendingNewlinePrev $prev
 						set isIgnoring "blockComment"
+					} elseif {$nextnext == "/"} {
+						set pendingNewline 1
+						set pendingNewlinePrev $prev
+						set isIgnoring "lineComment"
 					}
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
