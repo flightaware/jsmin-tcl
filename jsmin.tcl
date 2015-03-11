@@ -87,6 +87,9 @@ namespace eval jsmin {
 		# or quoted string. It can take on the values:
 		#  blockComment, lineComment, regex, singleQuote, or doubleQuote.
 		set isIgnoring ""
+
+		set pendingNewline 0
+		set pendingNewlinePrev ""
 		
 		# A common occurrence inside this while loop is to manually
 		# set cur and/or next. This has the effect of skipping a
@@ -104,7 +107,13 @@ namespace eval jsmin {
 				set isIgnoring "blockComment"
 			} elseif {$isIgnoring == "blockComment"} {
 				if {$cur == "*" && $next == "/"} {
-					get_stdin
+					if {$pendingNewline} {
+						set next "\n"
+						set cur $pendingNewlinePrev
+						set pendingNewline 0
+					} else {
+						get_stdin
+					}
 					set isIgnoring ""
 				}
 
@@ -127,10 +136,19 @@ namespace eval jsmin {
 				}
 
 			} elseif {$cur == "\n"} {
-				if {$next == " " || $next == "\t"} {
+				if {$next == " " || $next == "\t" || $next == "\n"} {
 					# Discard spaces
 					set next $cur
 					set cur $prev
+				} elseif {$next == "/"} {
+					# We need to get rid of the comment and then continue
+					# checking if this newline is necessary.
+					set nextnext [peek]
+					if {$nextnext == "*"} {
+						set pendingNewline 1
+						set pendingNewlinePrev $prev
+						set isIgnoring "blockComment"
+					}
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
 							  $prev ni {"\n" "," ";"} && \
