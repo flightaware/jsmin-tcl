@@ -3,6 +3,7 @@ namespace eval jsmin {
 	variable prev ""
 	variable cur ""
 	variable next ""
+	variable lookAhead ""
 	variable noSpaceChars {"\{" "\}" "(" ")" ";" "," "=" ":" ">" "<" "+" "*" "-" "%" "!" "&" "|" "?"}
 	variable afterNewlineChars {"\\" "\$" "_" "\{" "[" "(" "+" "-"}
 	variable beforeNewlineChars {"\\" "\$" "_" "\}" "]" ")" "+" "-"}
@@ -19,6 +20,7 @@ namespace eval jsmin {
 		variable prev
 		variable cur
 		variable next
+		variable lookAhead
 		
 		if {[eof stdin]} {
 			return 0
@@ -26,13 +28,29 @@ namespace eval jsmin {
 
 		set prev $cur
 		set cur $next
-		set next [read stdin 1]
+		if {$lookAhead != ""} {
+			set next $lookAhead
+			set lookAhead ""
+		} else {
+			set next [read stdin 1]
+		}	
 
 		if {$next == "\r"} {
 			set next "\n"
 		}
 
 		return 1
+	}
+
+	#
+	# Get the next character from stdin without affecting subsequent calls
+	# to get_stdin - prev, cur, and next remain unaffected.
+	# NOTE: Cannot be called consecutively.
+	#
+	proc peek {} {
+		variable lookAhead
+		set lookAhead [read stdin 1]
+		return $lookAhead
 	}
 	
 	#
@@ -64,34 +82,30 @@ namespace eval jsmin {
 		variable noSpaceChars
 		variable afterNewlineChars
 		variable beforeNewlineChars
-		# // Style comments.
-		set inLineComment 0
-		
-		# /* Style comments.
-		set inBlockComment 0
 
-		set inRegex 0
-		set inSingleQuote 0
-		set inDoubleQuote 0
+		# isIgnoring is used to signal if we're inside of a comment, regex,
+		# or quoted string. It can take on the values:
+		#  blockComment, lineComment, regex, singleQuote, or doubleQuote.
+		set isIgnoring ""
 		
 		# A common occurrence inside this while loop is to manually
 		# set cur and/or next. This has the effect of skipping a
 		# character as the next call of get_stdin will shift cur
 		# and next back to prev and cur.
 		while {[get_stdin]} {
-			if {$cur == "/" && $next == "/" && !$inBlockComment} {
-				set inLineComment 1
-			} elseif {$inLineComment} {
+			if {$cur == "/" && $next == "/" && $isIgnoring == ""} {
+				set isIgnoring "lineComment"
+			} elseif {$isIgnoring == "lineComment"} {
 				if {$next == "\n"} {
-					set inLineComment 0
+					set isIgnoring ""
 				}
 
-			} elseif {$cur == "/" && $next == "*" && !$inLineComment} {
-				set inBlockComment 1
-			} elseif {$inBlockComment} {
+			} elseif {$cur == "/" && $next == "*" && $isIgnoring == ""} {
+				set isIgnoring "blockComment"
+			} elseif {$isIgnoring == "blockComment"} {
 				if {$cur == "*" && $next == "/"} {
 					get_stdin
-					set inBlockComment 0
+					set isIgnoring ""
 				}
 
 			} elseif {$cur == " "} {
@@ -113,7 +127,15 @@ namespace eval jsmin {
 				}
 
 			} elseif {$cur == "\n"} {
-				if {$next in $afterNewlineChars || $prev in $beforeNewlineChars} {
+				if {$next == " " || $next == "\t"} {
+					# Discard spaces
+					set next $cur
+					set cur $prev
+				} elseif {$next ni $beforeNewlineChars && \
+							  $prev ni $afterNewlineChars && \
+							  $prev ni {"\n" "," ";"} && \
+							  ($next in $afterNewlineChars || \
+								   $prev in $beforeNewlineChars)} {
 					puts -nonewline $cur
 				}
 
