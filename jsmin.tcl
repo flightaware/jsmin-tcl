@@ -119,6 +119,16 @@ namespace eval jsmin {
 					}
 					set isIgnoring ""
 				}
+
+			} elseif {$cur == "'" && $isIgnoring == ""} {
+				set isIgnoring "singleQuote"
+				puts -nonewline $cur
+			} elseif {$isIgnoring == "singleQuote"} {
+				puts -nonewline $cur
+				if {$cur == "'" && $prev != "\\"} {
+					set isIgnoring ""
+				}
+
 			} elseif {$cur == "\"" && $isIgnoring == ""} {
 				set isIgnoring "doubleQuote"
 				puts -nonewline $cur
@@ -127,6 +137,16 @@ namespace eval jsmin {
 				if {$cur == "\"" && $prev != "\\"} {
 					set isIgnoring ""
 				}
+
+			} elseif {$cur == "/" && $prev == "=" && $isIgnoring == ""} {
+				set isIgnoring "regex"
+				puts -nonewline $cur
+			} elseif {$isIgnoring == "regex"} {
+				puts -nonewline $cur
+				if {$cur == "/" && $prev != "\\"} {
+					set isIgnoring ""
+				}
+
 			} elseif {$cur == " "} {
 				if {$prev == "\n"} {
 					# Discard space but keep newline as prev to remove
