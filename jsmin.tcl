@@ -5,8 +5,9 @@ namespace eval jsmin {
 	variable next ""
 	variable lookAhead ""
 	variable noSpaceChars {"\{" "\}" "(" ")" ";" "," "=" ":" ">" "<" "+" "*" "-" "%" "!" "&" "|" "?"}
-	variable afterNewlineChars {"\\" "\$" "_" "\{" "[" "(" "+" "-"}
-	variable beforeNewlineChars {"\\" "\$" "_" "\}" "]" ")" "+" "-"}
+	variable afterNewlineChars {"\{" "[" "("}
+	variable beforeNewlineChars {"\}" "]" ")"}
+	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
 
 	#
 	# Get the next character from stdin. If the character is a
@@ -82,6 +83,7 @@ namespace eval jsmin {
 		variable noSpaceChars
 		variable afterNewlineChars
 		variable beforeNewlineChars
+		variable leaveNewlineChars
 
 		# isIgnoring is used to signal if we're inside of a comment, regex,
 		# or quoted string. It can take on the values:
@@ -137,7 +139,7 @@ namespace eval jsmin {
 				if {$cur == "\"" && $prev != "\\"} {
 					set isIgnoring ""
 				}
-
+				
 			} elseif {$cur == "/" && $prev == "=" && $isIgnoring == ""} {
 				set isIgnoring "regex"
 				puts -nonewline $cur
@@ -187,7 +189,8 @@ namespace eval jsmin {
 							  $prev ni $afterNewlineChars && \
 							  $prev ni {"\n" "," ";"} && \
 							  ($next in $afterNewlineChars || \
-								   $prev in $beforeNewlineChars)} {
+								   $prev in $beforeNewlineChars || \
+								   $cur in $leaveNewlineChars)} {
 					puts -nonewline $cur
 				}
 
