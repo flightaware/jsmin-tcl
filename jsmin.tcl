@@ -119,7 +119,14 @@ namespace eval jsmin {
 					}
 					set isIgnoring ""
 				}
-
+			} elseif {$cur == "\"" && $isIgnoring == ""} {
+				set isIgnoring "doubleQuote"
+				puts -nonewline $cur
+			} elseif {$isIgnoring == "doubleQuote"} {
+				puts -nonewline $cur
+				if {$cur == "\"" && $prev != "\\"} {
+					set isIgnoring ""
+				}
 			} elseif {$cur == " "} {
 				if {$prev == "\n"} {
 					# Discard space but keep newline as prev to remove
