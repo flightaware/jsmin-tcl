@@ -7,7 +7,8 @@ namespace eval jsmin {
 	variable cur ""
 	variable next ""
 	variable lookAhead ""
-	variable noSpaceChars {"\{" "\}" "(" ")" "[" "]" ";" "," "=" ":" ">" "<" "+" "*" "-" "%" "!" "&" "|" "?"}
+	variable noSpaceChars {"\{" "\}" "(" ")" "[" "]" ";" "," "=" ":" ">" \
+							   "<" "+" "*" "-" "%" "!" "&" "|" "?" "/"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
 	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
