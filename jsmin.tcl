@@ -82,7 +82,7 @@ namespace eval jsmin {
 	# Remove unnecessary spaces and new lines.
 	# Removes comments and ignores quotes.
 	#
-	proc minify {{filename ""} {outfile ""}} {
+	proc minify {inputFp ofp} {
 		variable fp
 		variable prev
 		variable cur
@@ -93,18 +93,7 @@ namespace eval jsmin {
 		variable leaveNewlineChars
 		
 		# Open a channel for the file or stdin.
-		if {$filename == ""} {
-			set fp stdin
-		} else {
-			set fp [open $filename r]
-		}
-		
-		# Open the output channel.
-		if {$outfile == ""} {
-			set ofp stdout
-		} else {
-			set ofp [open $outfile w]
-		}
+		set fp $inputFp
 
 		# isIgnoring is used to signal if we're inside of a comment, regex,
 		# or quoted string. It can take on the values:
@@ -223,7 +212,6 @@ namespace eval jsmin {
 			}
 		}
 
-		close $fp
 	}
 }
 
