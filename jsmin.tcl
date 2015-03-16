@@ -201,7 +201,10 @@ namespace eval jsmin {
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   $cur in $leaveNewlineChars)} {
-					puts -nonewline $ofp $cur
+					if {![eof $fp]} {
+						# Don't puts a newline at the end of the file
+						puts -nonewline $ofp $cur
+					}
 				}
 
 			} elseif {$cur == "\t"} {
