@@ -1,5 +1,8 @@
 #!/usr/bin/tclsh
 namespace eval jsmin {
+	set version "1.0"
+
+	variable fp
 	variable prev ""
 	variable cur ""
 	variable next ""
@@ -10,20 +13,21 @@ namespace eval jsmin {
 	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
 
 	#
-	# Get the next character from stdin. If the character is a
-	# carrage return, '\r', then it replaces it with a line feed,
-	# '\n'.
+	# Get the next character from the input channel. If the
+	# character is a carrage return, '\r', then it replaces it
+	# with a line feed, '\n'.
 	#
 	# Namespace variables prev, cur, and next are used to keep
 	# track of the surrounding characters.
 	#
-	proc get_stdin {} {
+	proc get_char {} {
+		variable fp
 		variable prev
 		variable cur
 		variable next
 		variable lookAhead
 		
-		if {[eof stdin]} {
+		if {[eof $fp]} {
 			return 0
 		}
 
@@ -33,7 +37,7 @@ namespace eval jsmin {
 			set next $lookAhead
 			set lookAhead ""
 		} else {
-			set next [read stdin 1]
+			set next [read $fp 1]
 		}	
 
 		if {$next == "\r"} {
@@ -44,13 +48,15 @@ namespace eval jsmin {
 	}
 
 	#
-	# Get the next character from stdin without affecting subsequent calls
-	# to get_stdin - prev, cur, and next remain unaffected.
+	# Get the next character from the input channel without
+	# affecting subsequent calls to get_char - prev, cur,
+	# and next remain unaffected.
 	# NOTE: Cannot be called consecutively.
 	#
 	proc peek {} {
+		variable fp
 		variable lookAhead
-		set lookAhead [read stdin 1]
+		set lookAhead [read $fp 1]
 		return $lookAhead
 	}
 	
@@ -76,7 +82,8 @@ namespace eval jsmin {
 	# Remove unnecessary spaces and new lines.
 	# Removes comments and ignores quotes.
 	#
-	proc minify {} {
+	proc minify {{filename ""} {outfile ""}} {
+		variable fp
 		variable prev
 		variable cur
 		variable next
@@ -84,6 +91,20 @@ namespace eval jsmin {
 		variable afterNewlineChars
 		variable beforeNewlineChars
 		variable leaveNewlineChars
+		
+		# Open a channel for the file or stdin.
+		if {$filename == ""} {
+			set fp stdin
+		} else {
+			set fp [open $filename r]
+		}
+		
+		# Open the output channel.
+		if {$outfile == ""} {
+			set ofp stdout
+		} else {
+			set ofp [open $outfile w]
+		}
 
 		# isIgnoring is used to signal if we're inside of a comment, regex,
 		# or quoted string. It can take on the values:
@@ -95,9 +116,9 @@ namespace eval jsmin {
 		
 		# A common occurrence inside this while loop is to manually
 		# set cur and/or next. This has the effect of skipping a
-		# character as the next call of get_stdin will shift cur
+		# character as the next call of get_char will shift cur
 		# and next back to prev and cur.
-		while {[get_stdin]} {
+		while {[get_char]} {
 			if {$cur == "/" && $next == "/" && $isIgnoring == ""} {
 				set isIgnoring "lineComment"
 			} elseif {$isIgnoring == "lineComment"} {
@@ -117,34 +138,34 @@ namespace eval jsmin {
 						set cur $pendingNewlinePrev
 						set pendingNewline 0
 					} else {
-						get_stdin
+						get_char
 					}
 					set isIgnoring ""
 				}
 
 			} elseif {$cur == "'" && $isIgnoring == ""} {
 				set isIgnoring "singleQuote"
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "singleQuote"} {
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 				if {$cur == "'" && $prev != "\\"} {
 					set isIgnoring ""
 				}
 
 			} elseif {$cur == "\"" && $isIgnoring == ""} {
 				set isIgnoring "doubleQuote"
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "doubleQuote"} {
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 				if {$cur == "\"" && $prev != "\\"} {
 					set isIgnoring ""
 				}
 				
 			} elseif {$cur == "/" && $prev == "=" && $isIgnoring == ""} {
 				set isIgnoring "regex"
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "regex"} {
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 				if {$cur == "/" && $prev != "\\"} {
 					set isIgnoring ""
 				}
@@ -155,7 +176,7 @@ namespace eval jsmin {
 					# any more spaces.
 					set cur $prev
 				} elseif {![can_discard_space]} {
-					puts -nonewline $cur
+					puts -nonewline $ofp $cur
 				}
 
 			} elseif {$cur in $noSpaceChars} {
@@ -164,7 +185,7 @@ namespace eval jsmin {
 					set next $cur
 					set cur $prev
 				} else {
-					puts -nonewline $cur
+					puts -nonewline $ofp $cur
 				}
 
 			} elseif {$cur == "\n"} {
@@ -191,17 +212,19 @@ namespace eval jsmin {
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   $cur in $leaveNewlineChars)} {
-					puts -nonewline $cur
+					puts -nonewline $ofp $cur
 				}
 
 			} elseif {$cur == "\t"} {
 				# TODO This should behave similar to spaces.
 				continue
 			} else {
-				puts -nonewline $cur
+				puts -nonewline $ofp $cur
 			}
 		}
+
+		close $fp
 	}
 }
 
-jsmin::minify
+package provide jsmin $jsmin::version
