@@ -9,3 +9,9 @@ function() {
   }
   /* Another one */
 }
+
+var foo = [
+    // Some comment!
+    {"a": "b"},
+    {"c": "d"}
+];

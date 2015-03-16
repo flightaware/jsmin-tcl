@@ -11,6 +11,8 @@ namespace eval jsmin {
 							   "<" "+" "*" "-" "%" "!" "&" "|" "?" "/"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
+	# TODO Figure out all possiblilities for regexes
+	variable beforeRegexChars {"=" "+" "(" "&" "|"}
 	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
 
 	#
@@ -92,6 +94,7 @@ namespace eval jsmin {
 		variable afterNewlineChars
 		variable beforeNewlineChars
 		variable leaveNewlineChars
+		variable beforeRegexChars
 		
 		# Open a channel for the file or stdin.
 		set fp $inputFp
@@ -151,7 +154,8 @@ namespace eval jsmin {
 					set isIgnoring ""
 				}
 				
-			} elseif {$cur == "/" && $prev == "=" && $isIgnoring == ""} {
+			} elseif {$cur == "/" && $next != "/" && \
+						  $prev in $beforeRegexChars && $isIgnoring == ""} {
 				set isIgnoring "regex"
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "regex"} {
