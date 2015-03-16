@@ -10,7 +10,7 @@ test jsmin-1.1 {
 	set fp [open "tests/jsmin-1.1.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output "var a=4;var b=5;"
+} -output {var a=4;var b=5;var c=true&&(b>a);}
 
 test jsmin-1.2 {
 	Should remove comments
@@ -18,7 +18,7 @@ test jsmin-1.2 {
 	set fp [open "tests/jsmin-1.2.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output "var a=4;var b=5;function foo(){return 1;}"
+} -output {var a=4;var b=5;function foo(){return 1;}}
 
 test jsmin-1.3 {
 	Should remove comments between curly braces
@@ -52,5 +52,22 @@ test jsmin-1.6 {
 	jsmin::minify $fp stdout
 	close $fp
 } -output {var foo=/^.*some  regex+$/;var a="foo bar";console.log(a.replace(/foo /g,"bar"));var bar=/d(b+) d/g.exec("cdbb dbsbz");console.log("text "+/d(b+) d/g.lastIndex);if(true&&/d(b+) d/g.exec("cdbb dbsbz"))break;var baz={"a":/r+ e+  gex/};}
+
+test jsmin-1.7 {
+	Should remove whitespace between letters and an open quote.
+} -body {
+	set fp [open "tests/jsmin-1.7.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {function foo(){return"bar";}}
+
+test jsmin-1.8 {
+	Should keep newlines if no semicolon present
+} -body {
+	set fp [open "tests/jsmin-1.8.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var a=4
+var b=5}
 
 cleanupTests

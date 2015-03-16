@@ -8,7 +8,7 @@ namespace eval jsmin {
 	variable next ""
 	variable lookAhead ""
 	variable noSpaceChars {"\{" "\}" "(" ")" "[" "]" ";" "," "=" ":" ">" \
-							   "<" "+" "*" "-" "%" "!" "&" "|" "?" "/"}
+							   "<" "+" "*" "-" "%" "!" "&" "|" "?" "/" "\"" "'"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
 	# TODO Figure out all possiblilities for regexes
@@ -202,7 +202,7 @@ namespace eval jsmin {
 					}
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
-							  $prev ni {"\n" "," ";"} && \
+							  $prev ni {"\n" "," ";" "&" "|"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   $cur in $leaveNewlineChars)} {
