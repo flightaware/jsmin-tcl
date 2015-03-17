@@ -70,4 +70,12 @@ test jsmin-1.8 {
 } -output {var a=4
 var b=5}
 
+test jsmin-1.9 {
+	Should remove newlines between consecutive method calls
+} -body {
+	set fp [open "tests/jsmin-1.9.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {this.foo().baz().bar();}
+
 cleanupTests

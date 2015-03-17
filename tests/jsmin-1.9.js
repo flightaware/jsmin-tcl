@@ -1,0 +1,3 @@
+this.foo()
+    .baz()
+    .bar();
