@@ -12,7 +12,7 @@ namespace eval jsmin {
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
 	# TODO Figure out all possiblilities for regexes
-	variable beforeRegexChars {"=" "+" "(" "&" "|" ":"}
+	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n"}
 	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
 
 	#
