@@ -204,11 +204,12 @@ namespace eval jsmin {
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
 							  $prev ni {"\n" "," ";" "&" "|"} && \
-							  $next ni {"."} && \
+							  $next ni {"." "?" ":"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   [string is integer $prev] || \
-								   $cur in $leaveNewlineChars)} {
+								   $prev in $leaveNewlineChars || \
+								   $next in $leaveNewlineChars)} {
 					if {![eof $fp]} {
 						# Don't puts a newline at the end of the file
 						puts -nonewline $ofp $cur

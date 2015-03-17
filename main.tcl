@@ -86,4 +86,12 @@ test jsmin-1.10 {
 	close $fp
 } -output {var foo="Float32Array"in window;}
 
+test jsmin-1.11 {
+	Should remove newlines in ternary operator split across several lines
+} -body {
+	set fp [open "tests/jsmin-1.11.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var foo=function(s){return bar(s)?0:s;};}
+
 cleanupTests
