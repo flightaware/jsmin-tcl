@@ -70,10 +70,11 @@ namespace eval jsmin {
 	proc can_discard_space {} {
 		variable cur
 		variable next
+		variable prev
 		variable noSpaceChars
 		
 		if {$cur == " "} {
-			if {$next == " " || $next in $noSpaceChars} {
+			if {$next == " " || $next in $noSpaceChars || $prev in $noSpaceChars} {
 				return 1
 			}
 		}

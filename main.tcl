@@ -78,4 +78,12 @@ test jsmin-1.9 {
 	close $fp
 } -output {this.foo().baz().bar();}
 
+test jsmin-1.10 {
+	Should remove whitespace following a closed quoted string
+} -body {
+	set fp [open "tests/jsmin-1.10.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var foo="Float32Array"in window;}
+
 cleanupTests
