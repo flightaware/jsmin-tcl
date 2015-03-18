@@ -96,4 +96,21 @@ test jsmin-1.11 {
 	close $fp
 } -output {var foo=function(s){return bar(s)?0:s;};}
 
+test jsmin-1.12 {
+	Should keep newline in multiline var declaration
+} -body {
+	set fp [open "js/jsmin-1.12.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var
+foo=4,bar="a";}
+
+test jsmin-1.13 {
+	Should keep whitespace around inline block comment if no semicolon
+} -body {
+	set fp [open "js/jsmin-1.13.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var asd=1 foo.bar();}
+
 cleanupTests

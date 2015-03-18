@@ -125,6 +125,7 @@ namespace eval jsmin {
 
 			} elseif {$cur == "/" && $next == "*" && $isIgnoring == ""} {
 				set isIgnoring "blockComment"
+				set blockCommentPrev $prev
 			} elseif {$isIgnoring == "blockComment"} {
 				if {$cur == "*" && $next == "/"} {
 					if {$pendingNewline} {
@@ -133,6 +134,7 @@ namespace eval jsmin {
 						set pendingNewline 0
 					} else {
 						get_char
+						set cur $blockCommentPrev
 					}
 					set isIgnoring ""
 				}
@@ -166,11 +168,11 @@ namespace eval jsmin {
 				}
 
 			} elseif {$cur == " "} {
-				if {$prev == "\n"} {
-					# Discard space but keep newline as prev to remove
-					# any more spaces.
+				if {[can_discard_space]} {
+					# Discard space but keep $prev as prev in case
+					# we need to check it later.
 					set cur $prev
-				} elseif {![can_discard_space]} {
+				} else {
 					puts -nonewline $ofp $cur
 				}
 
