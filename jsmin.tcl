@@ -13,6 +13,7 @@ namespace eval jsmin {
 	variable beforeNewlineChars {"\}" "]" ")"}
 	# TODO Figure out all possiblilities for regexes
 	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n"}
+	# TODO These are not being used for anything
 	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
 
 	#
@@ -205,13 +206,11 @@ namespace eval jsmin {
 					}
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
-							  $prev ni {"\n" "," ";" "&" "|"} && \
+							  $prev ni {"\n" "," ";" "&" "|" ""} && \
 							  $next ni {"." "?" ":"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
-								   [string is integer $prev] || \
-								   $prev in $leaveNewlineChars || \
-								   $next in $leaveNewlineChars)} {
+								   [string is integer $prev])} {
 					if {![eof $fp]} {
 						# Don't puts a newline at the end of the file
 						puts -nonewline $ofp $cur

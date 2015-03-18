@@ -86,7 +86,7 @@ test jsmin-1.10 {
 	set fp [open "js/jsmin-1.10.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output {var foo="Float32Array"in window;}
+} -output {var foo="Float32Array"in window;var bar="this"+"that";}
 
 test jsmin-1.11 {
 	Should remove newlines in ternary operator split across several lines
@@ -94,7 +94,7 @@ test jsmin-1.11 {
 	set fp [open "js/jsmin-1.11.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output {var foo=function(s){return bar(s)?0:s;};}
+} -output {var foo=function(s){return bar(s)?0:s;};var a={"a":$this};}
 
 test jsmin-1.12 {
 	Should keep newline in multiline var declaration

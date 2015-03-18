@@ -3,3 +3,6 @@ var foo = function(s) {
       ? 0
       : s;
 };
+
+var a = {"a":
+	$this};
