@@ -108,6 +108,7 @@ namespace eval jsmin {
 
 		set pendingNewline 0
 		set pendingNewlinePrev ""
+		set unescapedBackslash 0
 		
 		# A common occurrence inside this while loop is to manually
 		# set cur and/or next. This has the effect of skipping a
@@ -145,20 +146,54 @@ namespace eval jsmin {
 
 			} elseif {$cur == "'" && $isIgnoring == ""} {
 				set isIgnoring "singleQuote"
+				set unescapedBackslash 0
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "singleQuote"} {
 				puts -nonewline $ofp $cur
-				if {$cur == "'" && $prev != "\\"} {
-					set isIgnoring ""
+				if {$cur == "\\"} {
+					if {$unescapedBackslash} {
+						set unescapedBackslash 0
+					} else {
+						set unescapedBackslash 1
+					}	
+				} elseif {$cur == "'"} {
+					if {$unescapedBackslash} {
+						# Just an escaped quote
+						set unescapedBackslash 0
+					} else {
+						# Quoted string has ended
+						set unescapedBackslash 0
+						set isIgnoring ""
+					}
+				} else {
+					# Some other escaped character. ie. "\n"
+					set unescapedBackslash 0
 				}
 
 			} elseif {$cur == "\"" && $isIgnoring == ""} {
 				set isIgnoring "doubleQuote"
+				set unescapedBackslash 0
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "doubleQuote"} {
 				puts -nonewline $ofp $cur
-				if {$cur == "\"" && $prev != "\\"} {
-					set isIgnoring ""
+				if {$cur == "\\"} {
+					if {$unescapedBackslash} {
+						set unescapedBackslash 0
+					} else {
+						set unescapedBackslash 1
+					}	
+				} elseif {$cur == "\""} {
+					if {$unescapedBackslash} {
+						# Just an escaped quote
+						set unescapedBackslash 0
+					} else {
+						# Quoted string has ended
+						set unescapedBackslash 0
+						set isIgnoring ""
+					}
+				} else {
+					# Some other escaped character. ie. "\n"
+					set unescapedBackslash 0
 				}
 				
 			} elseif {$cur == "/" && $next != "/" && \

@@ -4,4 +4,9 @@ var c = " nested 'quotes foo'";
 var d = ' nested "quotes foo"';
 var e = " nested \"quotes foo\"";
 var foo = ' nested \'quotes foo\'';
-
+var baz = '\\';
+var bar = "\\";
+var newline = "\n";
+var baz = '\\\'';
+var bar = "\\\"";
+var f = "asd";

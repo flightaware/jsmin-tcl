@@ -45,7 +45,7 @@ test jsmin-1.5 {
 	set fp [open "js/jsmin-1.5.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output {var a="foo   bar";var b=' foo baz  ';var c=" nested 'quotes foo'";var d=' nested "quotes foo"';var e=" nested \"quotes foo\"";var foo=' nested \'quotes foo\'';}
+} -output {var a="foo   bar";var b=' foo baz  ';var c=" nested 'quotes foo'";var d=' nested "quotes foo"';var e=" nested \"quotes foo\"";var foo=' nested \'quotes foo\'';var baz='\\';var bar="\\";var newline="\n";var baz='\\\'';var bar="\\\"";var f="asd";}
 
 test jsmin-1.6 {
 	Should ignore regular expressions
