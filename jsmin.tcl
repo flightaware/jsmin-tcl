@@ -116,10 +116,13 @@ namespace eval jsmin {
 		while {[get_char]} {
 			if {$cur == "/" && $next == "/" && $isIgnoring == ""} {
 				set isIgnoring "lineComment"
+				set lineCommentPrev $prev
 			} elseif {$isIgnoring == "lineComment"} {
 				if {$next == "\n"} {
 					if {$pendingNewline} {
 						set cur $pendingNewlinePrev
+					} else {
+						set cur $lineCommentPrev
 					}
 					set isIgnoring ""
 				}
@@ -210,6 +213,7 @@ namespace eval jsmin {
 							  $next ni {"." "?" ":"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
+								   ([string is alpha $prev] && [string is alpha $next]) || \
 								   [string is integer $prev])} {
 					if {![eof $fp]} {
 						# Don't puts a newline at the end of the file
