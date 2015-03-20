@@ -245,7 +245,7 @@ namespace eval jsmin {
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
 							  $prev ni {"\n" "," ";" "&" "|" ""} && \
-							  $next ni {"." "?" ":"} && \
+							  $next ni {"."  "?" ":" "&" "|"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   ([string is alpha $prev] && [string is alpha $next]) || \

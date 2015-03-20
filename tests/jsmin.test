@@ -113,4 +113,12 @@ test jsmin-1.13 {
 	close $fp
 } -output {var asd=1 foo.bar();}
 
+test jsmin-1.14 {
+	More problems
+} -body {
+	set fp [open "js/jsmin-1.14.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var asd=1 foo.bar();}
+
 cleanupTests
