@@ -129,6 +129,7 @@ namespace eval jsmin {
 				if {$next == "\n"} {
 					if {$pendingNewline} {
 						set cur $pendingNewlinePrev
+						set pendingNewline 0
 					} else {
 						set cur $lineCommentPrev
 					}

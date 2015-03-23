@@ -131,4 +131,13 @@ test jsmin-1.15 {
 b();c--
 d();var e=2+ ++a;var f=2- --a;var g=2+ --a;var h=2- ++a;}
 
+test jsmin-1.16 {
+	Should correctly remove // style line comments
+} -body {
+	set fp [open "js/jsmin-1.16.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {if(true){var a="b";}
+var c="";var d=c;}
+
 cleanupTests
