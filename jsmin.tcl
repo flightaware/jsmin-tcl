@@ -47,6 +47,8 @@ namespace eval jsmin {
 
 		if {$next == "\r"} {
 			set next "\n"
+		} elseif {$next == "\t"} {
+			set next " "
 		}
 
 		return 1
@@ -266,9 +268,6 @@ namespace eval jsmin {
 					puts -nonewline $ofp $cur
 				}
 
-			} elseif {$cur == "\t"} {
-				# TODO This should behave similar to spaces.
-				continue
 			} else {
 				puts -nonewline $ofp $cur
 			}

@@ -140,4 +140,12 @@ test jsmin-1.16 {
 } -output {if(true){var a="b";}
 var c="";var d=c;}
 
+test jsmin-1.17 {
+	Correctly handle tabs
+} -body {
+	set fp [open "js/jsmin-1.17.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var a=4;}
+
 cleanupTests
