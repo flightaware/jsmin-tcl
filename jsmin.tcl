@@ -129,6 +129,9 @@ namespace eval jsmin {
 				set lineCommentPrev $prev
 			} elseif {$isIgnoring == "lineComment"} {
 				if {$next == "\n"} {
+					# pendingNewline is set whenever a newline is followed by
+					# a comment. This is needed because we don't know if the
+					# newline is necessary until we remove the comment.
 					if {$pendingNewline} {
 						set cur $pendingNewlinePrev
 						set pendingNewline 0
