@@ -7,8 +7,9 @@ namespace eval jsmin {
 	variable cur ""
 	variable next ""
 	variable lookAhead ""
+	variable plusMinus {"+" "-"}
 	variable noSpaceChars {"\{" "\}" "(" ")" "[" "]" ";" "," "=" ":" ">" \
-							   "<" "+" "*" "-" "%" "!" "&" "|" "?" "/" "\"" "'"}
+							   "<" "*" "%" "!" "&" "|" "?" "/" "\"" "'"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
 	# TODO Figure out all possiblilities for regexes
@@ -73,9 +74,14 @@ namespace eval jsmin {
 		variable next
 		variable prev
 		variable noSpaceChars
+		variable plusMinus
 		
 		if {$cur == " "} {
-			if {$next == " " || $next in $noSpaceChars || $prev in $noSpaceChars} {
+			if {$next in $plusMinus && $prev in $plusMinus} {
+				# We cannot remove spaces in expressions like "c=a- ++b"
+				return 0
+			} elseif {$next == " " || $next in $noSpaceChars || $prev in $noSpaceChars || \
+						  $next in $plusMinus || $prev in $plusMinus} {
 				return 1
 			}
 		}
@@ -92,6 +98,7 @@ namespace eval jsmin {
 		variable prev
 		variable cur
 		variable next
+		variable plusMinus
 		variable noSpaceChars
 		variable afterNewlineChars
 		variable beforeNewlineChars
@@ -248,12 +255,14 @@ namespace eval jsmin {
 							  $next ni {"."  "?" ":" "&" "|"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
-								   ([string is alpha $prev] && [string is alpha $next]) || \
 								   [string is integer $prev])} {
 					if {![eof $fp]} {
 						# Don't puts a newline at the end of the file
 						puts -nonewline $ofp $cur
 					}
+				} elseif { ([string is alpha $prev] || $prev in $plusMinus) && \
+						   ([string is alpha $next] || $next in $plusMinus) } {
+					puts -nonewline $ofp $cur
 				}
 
 			} elseif {$cur == "\t"} {

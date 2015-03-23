@@ -119,6 +119,16 @@ test jsmin-1.14 {
 	set fp [open "js/jsmin-1.14.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output {var asd=1 foo.bar();}
+} -output {if(foo()&&bar()){return false;}}
+
+test jsmin-1.15 {
+	Should keep necessary whitespace around plus and minus operators
+} -body {
+	set fp [open "js/jsmin-1.15.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {a++
+b();c--
+d();var e=2+ ++a;var f=2- --a;var g=2+ --a;var h=2- ++a;}
 
 cleanupTests
