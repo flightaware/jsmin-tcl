@@ -21,8 +21,6 @@ After minification becomes:
 var foo="bar";function example(arg0,arg1){console.log("example");}
 ```
 
-----------
-
 >**NOTE**:
 > JSMin-Tcl handles the + and - operators slightly differently than Crockford's JSMin.
 >
@@ -53,8 +51,12 @@ var foo="bar";function example(arg0,arg1){console.log("example");}
 
 Usage
 -----
-The main proc in JSMin-Tcl is called "minify".can be used as follows:
-**Be sure to retain your original source file.**
+Minification is done using the "minify" proc in JSMin-Tcl. **Be sure to retain your original source file. Minification cannot be undone.**
+```
+jsmin::minify inputChannel outputChannel
+```
+
+Example:
 
 ```
 package require jsmin
