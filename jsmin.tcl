@@ -12,15 +12,13 @@ namespace eval jsmin {
 							   "<" "*" "%" "!" "&" "|" "?" "/" "\"" "'"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
-	# TODO Figure out all possiblilities for regexes
 	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n"}
-	# TODO These are not being used for anything
-	variable leaveNewlineChars {"\\" "\$" "_" "+" "-"}
 
 	#
 	# Get the next character from the input channel. If the
 	# character is a carrage return, '\r', then it replaces it
-	# with a line feed, '\n'.
+	# with a line feed, '\n'. If the character is a tab, replace
+	# it with a space.
 	#
 	# Namespace variables prev, cur, and next are used to keep
 	# track of the surrounding characters.
@@ -68,8 +66,9 @@ namespace eval jsmin {
 	}
 	
 	#
-	# Determines by looking at the next character if the
-	# current space character can be discarded.
+	# Determines by looking at the next and previous
+	# character if the current space character can be
+	# discarded.
 	#
 	proc can_discard_space {} {
 		variable cur
@@ -92,8 +91,9 @@ namespace eval jsmin {
 	}
 
 	#
-	# Remove unnecessary spaces and new lines.
-	# Removes comments and ignores quotes.
+	# Removes unnecessary spaces, tabs, and new lines.
+	# Removes comments, ignores quotes and regular
+	# expressions.
 	#
 	proc minify {inputFp ofp} {
 		variable fp
@@ -104,10 +104,10 @@ namespace eval jsmin {
 		variable noSpaceChars
 		variable afterNewlineChars
 		variable beforeNewlineChars
-		variable leaveNewlineChars
 		variable beforeRegexChars
 		
-		# Open a channel for the file or stdin.
+		# Set the input channel namespace variable since it's used
+		# by other procs in this namespace.
 		set fp $inputFp
 
 		# isIgnoring is used to signal if we're inside of a comment, regex,
@@ -160,6 +160,8 @@ namespace eval jsmin {
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "singleQuote"} {
 				puts -nonewline $ofp $cur
+				
+				# Check if we should clear isIgnoring
 				if {$cur == "\\"} {
 					if {$unescapedBackslash} {
 						set unescapedBackslash 0
@@ -167,6 +169,9 @@ namespace eval jsmin {
 						set unescapedBackslash 1
 					}	
 				} elseif {$cur == "'"} {
+					# unescapedBackslash is used to tell if 
+					# the next quote is escaped or not. It
+					# is used for double quotes as well.
 					if {$unescapedBackslash} {
 						# Just an escaped quote
 						set unescapedBackslash 0
@@ -208,11 +213,13 @@ namespace eval jsmin {
 				
 			} elseif {$cur == "/" && $next != "/" && \
 						  $prev in $beforeRegexChars && $isIgnoring == ""} {
+				# Inside a regex
 				set isIgnoring "regex"
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring == "regex"} {
 				puts -nonewline $ofp $cur
 				if {$cur == "/" && $prev != "\\"} {
+					# Just exited a regex
 					set isIgnoring ""
 				}
 
@@ -227,7 +234,8 @@ namespace eval jsmin {
 
 			} elseif {$cur in $noSpaceChars} {
 				if {$next == " "} {
-					# Discard space but don't puts cur yet.
+					# Discard space but don't puts $cur yet
+					# in case there are more spaces.
 					set next $cur
 					set cur $prev
 				} else {
@@ -235,12 +243,13 @@ namespace eval jsmin {
 				}
 
 			} elseif {$cur == "\n"} {
-				if {$next == " " || $next == "\t" || $next == "\n"} {
+				if {$next == " " || $next == "\n"} {
 					# Discard spaces
 					set next $cur
 					set cur $prev
 				} elseif {$next == "/"} {
-					# We need to get rid of the comment and then continue
+					# Check if there's a comment ahead. If so,
+					# we need to remove it and then continue
 					# checking if this newline is necessary.
 					set nextnext [peek]
 					if {$nextnext == "*"} {
@@ -259,12 +268,18 @@ namespace eval jsmin {
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   [string is integer $prev])} {
+					# Because semicolons are optional and newlines are sometimes
+					# used for automatic semicolon insertion, we need to check
+					# the above, complicated rules.
+
 					if {![eof $fp]} {
 						# Don't puts a newline at the end of the file
 						puts -nonewline $ofp $cur
 					}
 				} elseif { ([string is alpha $prev] || $prev in $plusMinus) && \
 						   ([string is alpha $next] || $next in $plusMinus) } {
+					# We have to make sure we don't remove semicolon-less 
+					# newlines preceding ++ or --.
 					puts -nonewline $ofp $cur
 				}
 
