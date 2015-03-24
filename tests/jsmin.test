@@ -159,4 +159,12 @@ test jsmin-1.18 {
 	close $fp
 } -output {var foo=bar?(1+1):1;var a=4;var b=4^2;}
 
+test jsmin-1.19 {
+	Should handle escaped characters in regex
+} -body {
+	set fp [open "js/jsmin-1.19.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var regex=/regex\\/;var foo="foo";}
+
 cleanupTests

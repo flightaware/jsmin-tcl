@@ -218,12 +218,28 @@ namespace eval jsmin {
 						  $prev in $beforeRegexChars && $isIgnoring eq ""} {
 				# Inside a regex
 				set isIgnoring "regex"
+				set unescapedBackslash 0
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring eq "regex"} {
 				puts -nonewline $ofp $cur
-				if {$cur eq "/" && $prev ne "\\"} {
-					# Just exited a regex
-					set isIgnoring ""
+				if {$cur eq "\\"} {
+					if {$unescapedBackslash} {
+						set unescapedBackslash 0
+					} else {
+						set unescapedBackslash 1
+					}
+				} elseif {$cur eq "/"} {
+					if {$unescapedBackslash} {
+						# Just an escaped slash
+						set unescapedBackslash 0
+					} else {
+						# Just exited a regex
+						set unescapedBackslash 0
+						set isIgnoring ""
+					}
+				} else {
+					# Maybe some other escaped character. ie. "\n"
+					set unescapedBackslash 0
 				}
 
 			} elseif {$cur eq " "} {
