@@ -279,8 +279,10 @@ namespace eval jsmin {
 						# Don't puts a newline at the end of the file
 						puts -nonewline $ofp $cur
 					}
-				} elseif { ([string is alpha $prev] || $prev in $plusMinus) && \
-						   ([string is alpha $next] || $next in $plusMinus) } {
+				} elseif { ([string is alpha $prev] || $prev in $plusMinus || \
+								$prev in {"_" "$"}) && \
+						   ([string is alpha $next] || $next in $plusMinus || \
+								$next in {"_" "$"}) } {
 					# We have to make sure we don't remove semicolon-less 
 					# newlines preceding ++ or --.
 					puts -nonewline $ofp $cur

@@ -103,7 +103,10 @@ test jsmin-1.12 {
 	jsmin::minify $fp stdout
 	close $fp
 } -output {var
-foo=4,bar="a";}
+foo=4,bar="a";var
+_foo=4,$bar="a";var foo=foo$
+var bar=bar_
+foo();}
 
 test jsmin-1.13 {
 	Should keep whitespace around inline block comment if no semicolon
