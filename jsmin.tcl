@@ -36,16 +36,16 @@ namespace eval jsmin {
 
 		set prev $cur
 		set cur $next
-		if {$lookAhead != ""} {
+		if {$lookAhead ne ""} {
 			set next $lookAhead
 			set lookAhead ""
 		} else {
 			set next [read $fp 1]
 		}	
 
-		if {$next == "\r"} {
+		if {$next eq "\r"} {
 			set next "\n"
-		} elseif {$next == "\t"} {
+		} elseif {$next eq "\t"} {
 			set next " "
 		}
 
@@ -77,11 +77,11 @@ namespace eval jsmin {
 		variable noSpaceChars
 		variable plusMinus
 		
-		if {$cur == " "} {
+		if {$cur eq " "} {
 			if {$next in $plusMinus && $prev in $plusMinus} {
 				# We cannot remove spaces in expressions like "c=a- ++b"
 				return 0
-			} elseif {$next == " " || $next in $noSpaceChars || $prev in $noSpaceChars || \
+			} elseif {$next eq " " || $next in $noSpaceChars || $prev in $noSpaceChars || \
 						  $next in $plusMinus || $prev in $plusMinus} {
 				return 1
 			}
@@ -124,11 +124,11 @@ namespace eval jsmin {
 		# character as the next call of get_char will shift cur
 		# and next back to prev and cur.
 		while {[get_char]} {
-			if {$cur == "/" && $next == "/" && $isIgnoring == ""} {
+			if {$cur eq "/" && $next eq "/" && $isIgnoring eq ""} {
 				set isIgnoring "lineComment"
 				set lineCommentPrev $prev
-			} elseif {$isIgnoring == "lineComment"} {
-				if {$next == "\n"} {
+			} elseif {$isIgnoring eq "lineComment"} {
+				if {$next eq "\n"} {
 					# pendingNewline is set whenever a newline is followed by
 					# a comment. This is needed because we don't know if the
 					# newline is necessary until we remove the comment.
@@ -141,11 +141,11 @@ namespace eval jsmin {
 					set isIgnoring ""
 				}
 
-			} elseif {$cur == "/" && $next == "*" && $isIgnoring == ""} {
+			} elseif {$cur eq "/" && $next eq "*" && $isIgnoring eq ""} {
 				set isIgnoring "blockComment"
 				set blockCommentPrev $prev
-			} elseif {$isIgnoring == "blockComment"} {
-				if {$cur == "*" && $next == "/"} {
+			} elseif {$isIgnoring eq "blockComment"} {
+				if {$cur eq "*" && $next eq "/"} {
 					if {$pendingNewline} {
 						set next "\n"
 						set cur $pendingNewlinePrev
@@ -157,21 +157,21 @@ namespace eval jsmin {
 					set isIgnoring ""
 				}
 
-			} elseif {$cur == "'" && $isIgnoring == ""} {
+			} elseif {$cur eq "'" && $isIgnoring eq ""} {
 				set isIgnoring "singleQuote"
 				set unescapedBackslash 0
 				puts -nonewline $ofp $cur
-			} elseif {$isIgnoring == "singleQuote"} {
+			} elseif {$isIgnoring eq "singleQuote"} {
 				puts -nonewline $ofp $cur
 				
 				# Check if we should clear isIgnoring
-				if {$cur == "\\"} {
+				if {$cur eq "\\"} {
 					if {$unescapedBackslash} {
 						set unescapedBackslash 0
 					} else {
 						set unescapedBackslash 1
 					}	
-				} elseif {$cur == "'"} {
+				} elseif {$cur eq "'"} {
 					# unescapedBackslash is used to tell if 
 					# the next quote is escaped or not. It
 					# is used for double quotes as well.
@@ -188,19 +188,19 @@ namespace eval jsmin {
 					set unescapedBackslash 0
 				}
 
-			} elseif {$cur == "\"" && $isIgnoring == ""} {
+			} elseif {$cur eq "\"" && $isIgnoring eq ""} {
 				set isIgnoring "doubleQuote"
 				set unescapedBackslash 0
 				puts -nonewline $ofp $cur
-			} elseif {$isIgnoring == "doubleQuote"} {
+			} elseif {$isIgnoring eq "doubleQuote"} {
 				puts -nonewline $ofp $cur
-				if {$cur == "\\"} {
+				if {$cur eq "\\"} {
 					if {$unescapedBackslash} {
 						set unescapedBackslash 0
 					} else {
 						set unescapedBackslash 1
 					}	
-				} elseif {$cur == "\""} {
+				} elseif {$cur eq "\""} {
 					if {$unescapedBackslash} {
 						# Just an escaped quote
 						set unescapedBackslash 0
@@ -214,19 +214,19 @@ namespace eval jsmin {
 					set unescapedBackslash 0
 				}
 				
-			} elseif {$cur == "/" && $next != "/" && \
-						  $prev in $beforeRegexChars && $isIgnoring == ""} {
+			} elseif {$cur eq "/" && $next ne "/" && \
+						  $prev in $beforeRegexChars && $isIgnoring eq ""} {
 				# Inside a regex
 				set isIgnoring "regex"
 				puts -nonewline $ofp $cur
-			} elseif {$isIgnoring == "regex"} {
+			} elseif {$isIgnoring eq "regex"} {
 				puts -nonewline $ofp $cur
-				if {$cur == "/" && $prev != "\\"} {
+				if {$cur eq "/" && $prev ne "\\"} {
 					# Just exited a regex
 					set isIgnoring ""
 				}
 
-			} elseif {$cur == " "} {
+			} elseif {$cur eq " "} {
 				if {[can_discard_space]} {
 					# Discard space but keep $prev as prev in case
 					# we need to check it later.
@@ -236,7 +236,7 @@ namespace eval jsmin {
 				}
 
 			} elseif {$cur in $noSpaceChars} {
-				if {$next == " "} {
+				if {$next eq " "} {
 					# Discard space but don't puts $cur yet
 					# in case there are more spaces.
 					set next $cur
@@ -245,21 +245,21 @@ namespace eval jsmin {
 					puts -nonewline $ofp $cur
 				}
 
-			} elseif {$cur == "\n"} {
-				if {$next == " " || $next == "\n"} {
+			} elseif {$cur eq "\n"} {
+				if {$next eq " " || $next eq "\n"} {
 					# Discard spaces
 					set next $cur
 					set cur $prev
-				} elseif {$next == "/"} {
+				} elseif {$next eq "/"} {
 					# Check if there's a comment ahead. If so,
 					# we need to remove it and then continue
 					# checking if this newline is necessary.
 					set nextnext [peek]
-					if {$nextnext == "*"} {
+					if {$nextnext eq "*"} {
 						set pendingNewline 1
 						set pendingNewlinePrev $prev
 						set isIgnoring "blockComment"
-					} elseif {$nextnext == "/"} {
+					} elseif {$nextnext eq "/"} {
 						set pendingNewline 1
 						set pendingNewlinePrev $prev
 						set isIgnoring "lineComment"
