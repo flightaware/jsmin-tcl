@@ -151,4 +151,12 @@ test jsmin-1.17 {
 	close $fp
 } -output {var a=4;}
 
+test jsmin-1.18 {
+	Should remove whitespace in some more uncommon examples
+} -body {
+	set fp [open "js/jsmin-1.18.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var foo=bar?(1+1):1;var a=4;var b=4^2;}
+
 cleanupTests

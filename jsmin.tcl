@@ -9,7 +9,7 @@ namespace eval jsmin {
 	variable lookAhead ""
 	variable plusMinus {"+" "-"}
 	variable noSpaceChars {"\{" "\}" "(" ")" "[" "]" ";" "," "=" ":" ">" \
-							   "<" "*" "%" "!" "&" "|" "?" "/" "\"" "'"}
+							   "<" "*" "%" "!" "&" "|" "?" "/" "\"" "'" "^"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
 	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n"}
@@ -266,8 +266,8 @@ namespace eval jsmin {
 					}
 				} elseif {$next ni $beforeNewlineChars && \
 							  $prev ni $afterNewlineChars && \
-							  $prev ni {"\n" "," ";" "&" "|" ""} && \
-							  $next ni {"."  "?" ":" "&" "|"} && \
+							  $prev ni {"\n" "?" ":" "=" "," ";" "&" "|" ""} && \
+							  $next ni {"."  "?" ":" "=" "&" "|"} && \
 							  ($next in $afterNewlineChars || \
 								   $prev in $beforeNewlineChars || \
 								   [string is integer $prev])} {
