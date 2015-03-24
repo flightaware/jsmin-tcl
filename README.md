@@ -65,3 +65,12 @@ set fp [open "exampleFile.js"]
 jsmin::minify $fp stdout
 close $fp
 ```
+
+If you want to directly pass a string of JavaScript and store the result in a variable you can do so like this:
+```
+package require jsmin
+
+set in [::tcl::chan::string $js]
+set out [::tcl::chan::variable outstring]
+jsmin::minify $in $out
+```
