@@ -12,7 +12,7 @@ namespace eval jsmin {
 							   "<" "*" "%" "!" "&" "|" "?" "/" "\"" "'" "^"}
 	variable afterNewlineChars {"\{" "[" "("}
 	variable beforeNewlineChars {"\}" "]" ")"}
-	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n"}
+	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n" "!"}
 
 	#
 	# Get the next character from the input channel. If the
