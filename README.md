@@ -21,33 +21,33 @@ After minification becomes:
 var foo="bar";function example(arg0,arg1){console.log("example");}
 ```
 
->**NOTE**:
-> JSMin-Tcl handles the + and - operators slightly differently than Crockford's JSMin.
->
-> JSMin-Tcl removes whitespace surrounding + and - operators unless doing so would place
-> several of them together.
->
-> The original JSMin does this too, except in a few cases demonstrated below.
-> ```
-> var a = 1 / +b;
-> var foo = "bar"
->   + "baz";
-> var foo2 = "bar" +
->   "baz";
-> ```
->
-> After minification JSMin-Tcl yields:
-> ```
-> var a=1/+b;var foo="bar"+"baz";var foo2="bar"+"baz";
-> ```
->
-> However, JSMin yields:
-> ```
-> var a=1/ +b;var foo="bar"
-> +"baz";var foo2="bar"+"baz";
-> ```
->
-> Both are valid JavaScript but JSMin-Tcl yields a smaller filesize.
+**NOTE**:
+JSMin-Tcl handles the + and - operators slightly differently than Crockford's JSMin.
+
+JSMin-Tcl removes whitespace surrounding + and - operators unless doing so would place
+several of them together.
+
+The original JSMin does this too, except in a few cases demonstrated below.
+```
+var a = 1 / +b;
+var foo = "bar"
+  + "baz";
+var foo2 = "bar" +
+  "baz";
+```
+
+After minification JSMin-Tcl yields:
+```
+var a=1/+b;var foo="bar"+"baz";var foo2="bar"+"baz";
+```
+
+However, JSMin yields:
+```
+var a=1/ +b;var foo="bar"
++"baz";var foo2="bar"+"baz";
+```
+
+Both are valid JavaScript but JSMin-Tcl yields a smaller filesize.
 
 Usage
 -----
