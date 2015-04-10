@@ -67,7 +67,7 @@ close $fp
 ```
 
 If you want to directly pass a string of JavaScript and store the result in a variable you can do so like this:
-```
+```tcl
 package require jsmin
 
 set in [::tcl::chan::string $js]
