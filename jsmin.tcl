@@ -11,7 +11,7 @@ namespace eval jsmin {
 	variable noSpaceChars {"\{" "\}" "(" ")" "[" "]" ";" "," "=" ":" ">" \
 							   "<" "*" "%" "!" "&" "|" "?" "/" "\"" "'" "^"}
 	variable afterNewlineChars {"\{" "[" "("}
-	variable beforeNewlineChars {"\}" "]" ")"}
+	variable beforeNewlineChars {"\}" "]" ")" "'" "\""}
 	variable beforeRegexChars {"=" "+" "(" "&" "|" ":" "\n" "!"}
 
 	#
@@ -29,7 +29,7 @@ namespace eval jsmin {
 		variable cur
 		variable next
 		variable lookAhead
-		
+
 		if {[eof $fp]} {
 			return 0
 		}
@@ -41,7 +41,7 @@ namespace eval jsmin {
 			set lookAhead ""
 		} else {
 			set next [read $fp 1]
-		}	
+		}
 
 		if {$next eq "\r"} {
 			set next "\n"
@@ -64,7 +64,7 @@ namespace eval jsmin {
 		set lookAhead [read $fp 1]
 		return $lookAhead
 	}
-	
+
 	#
 	# Determines by looking at the next and previous
 	# character if the current space character can be
@@ -76,7 +76,7 @@ namespace eval jsmin {
 		variable prev
 		variable noSpaceChars
 		variable plusMinus
-		
+
 		if {$cur eq " "} {
 			if {$next in $plusMinus && $prev in $plusMinus} {
 				# We cannot remove spaces in expressions like "c=a- ++b"
@@ -86,7 +86,7 @@ namespace eval jsmin {
 				return 1
 			}
 		}
-		
+
 		return 0
 	}
 
@@ -105,7 +105,7 @@ namespace eval jsmin {
 		variable afterNewlineChars
 		variable beforeNewlineChars
 		variable beforeRegexChars
-		
+
 		# Set the input channel namespace variable since it's used
 		# by other procs in this namespace.
 		set fp $inputFp
@@ -118,7 +118,7 @@ namespace eval jsmin {
 		set pendingNewline 0
 		set pendingNewlinePrev ""
 		set unescapedBackslash 0
-		
+
 		# A common occurrence inside this while loop is to manually
 		# set cur and/or next. This has the effect of skipping a
 		# character as the next call of get_char will shift cur
@@ -163,16 +163,16 @@ namespace eval jsmin {
 				puts -nonewline $ofp $cur
 			} elseif {$isIgnoring eq "singleQuote"} {
 				puts -nonewline $ofp $cur
-				
+
 				# Check if we should clear isIgnoring
 				if {$cur eq "\\"} {
 					if {$unescapedBackslash} {
 						set unescapedBackslash 0
 					} else {
 						set unescapedBackslash 1
-					}	
+					}
 				} elseif {$cur eq "'"} {
-					# unescapedBackslash is used to tell if 
+					# unescapedBackslash is used to tell if
 					# the next quote is escaped or not. It
 					# is used for double quotes as well.
 					if {$unescapedBackslash} {
@@ -199,7 +199,7 @@ namespace eval jsmin {
 						set unescapedBackslash 0
 					} else {
 						set unescapedBackslash 1
-					}	
+					}
 				} elseif {$cur eq "\""} {
 					if {$unescapedBackslash} {
 						# Just an escaped quote
@@ -213,7 +213,7 @@ namespace eval jsmin {
 					# Some other escaped character. ie. "\n"
 					set unescapedBackslash 0
 				}
-				
+
 			} elseif {$cur eq "/" && $next ne "/" && \
 						  $prev in $beforeRegexChars && $isIgnoring eq ""} {
 				# Inside a regex
@@ -299,7 +299,7 @@ namespace eval jsmin {
 								$prev in {"_" "$"}) && \
 						   ([string is alpha $next] || $next in $plusMinus || \
 								$next in {"_" "$"}) } {
-					# We have to make sure we don't remove semicolon-less 
+					# We have to make sure we don't remove semicolon-less
 					# newlines preceding ++ or --.
 					puts -nonewline $ofp $cur
 				}

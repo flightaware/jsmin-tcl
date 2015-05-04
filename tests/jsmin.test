@@ -86,7 +86,8 @@ test jsmin-1.10 {
 	set fp [open "js/jsmin-1.10.js"]
 	jsmin::minify $fp stdout
 	close $fp
-} -output {var foo="Float32Array"in window;var bar="this"+"that";}
+} -output {var foo="Float32Array"in window;var bar="this"
++"that";}
 
 test jsmin-1.11 {
 	Should remove newlines in ternary operator split across several lines
@@ -166,5 +167,15 @@ test jsmin-1.19 {
 	jsmin::minify $fp stdout
 	close $fp
 } -output {var regex=/regex\\/;var foo="foo";}
+
+test jsmin-1.20 {
+	Should leave new line for implicit semicolon following quotes
+} -body {
+	set fp [open "js/jsmin-1.20.js"]
+	jsmin::minify $fp stdout
+	close $fp
+} -output {var a=(b==c)?'d':'e'
+var a=(b==c)?"d":"e"
+foo+=bar;}
 
 cleanupTests
