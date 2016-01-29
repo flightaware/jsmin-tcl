@@ -1,6 +1,6 @@
 JSMin-Tcl
 =========
-JSMin-Tcl is a JavaScript minifier written in Tcl. Although inspired by Douglas Crockford's C-based JSMin, it has its own implementation and is **not** simply port. The behavior should be identical to Crockford's JSMin except as described below.
+JSMin-Tcl is a JavaScript minifier written in Tcl. Although inspired by Douglas Crockford's C-based JSMin, it has its own implementation and is **not** simply port. The behavior should be identical to Crockford's JSMin.
 
 Behavior
 --------
