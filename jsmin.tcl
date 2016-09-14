@@ -90,6 +90,21 @@ namespace eval jsmin {
 		return 0
 	}
 
+	proc init {} {
+		# Make sure the namespace variables are properly initialized.
+		variable fp
+		variable prev
+		variable cur
+		variable next
+		variable lookAhead
+
+		set fp ""
+		set prev ""
+		set cur ""
+		set next ""
+		set lookAhead ""
+	}
+
 	#
 	# Removes unnecessary spaces, tabs, and new lines.
 	# Removes comments, ignores quotes and regular
@@ -105,6 +120,8 @@ namespace eval jsmin {
 		variable afterNewlineChars
 		variable beforeNewlineChars
 		variable beforeRegexChars
+
+		init
 
 		# Set the input channel namespace variable since it's used
 		# by other procs in this namespace.
